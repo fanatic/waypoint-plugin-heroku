@@ -2,6 +2,8 @@
 
 Waypoint integration with Heroku platform
 
+**WORK IN PROGRESS: this plugin is not yet functional**
+
 ## Build
 
 The build stage takes application source code and converts it to and artifact, optionally pushing to a registry so it's available for the deployment platform. Heroku offers a number of ways to build code for deployment to the platform.
