@@ -5,6 +5,7 @@ package platform;
 
 option go_package = "github.com/fanatic/waypoint-plugin-heroku/builder";
 
-message Binary {
-  string location = 1;
+// Slug is the artifact type
+message Slug {
+  string id = 1;
 }
