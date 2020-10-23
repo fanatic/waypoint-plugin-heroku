@@ -20,11 +20,12 @@ Heroku requires either a slug or a container to release code to an application. 
 Takes previously built slug or container and stages it onto Heroku.
 
 - Noop - use latest slug on existing Heroku app
-- Create new pipeline app from the given artifact
+- Release slug or container image onto existing app
+- Create new pipeline app from slug or container image
 
 ## Release
 
 Activates previously staged deployment
 
-- Noop - single-app model, or rely on Heroku Pipeline Promotion to release to a "production" app and general traffi
+- Noop - single-app model, or rely on Heroku Pipeline Promotion to release to a "production" app and general traffic
 - Custom Domain - Moves the public DNS domain to a staged app
