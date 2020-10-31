@@ -22,7 +22,7 @@ import (
 )
 
 type RegistryConfig struct {
-	Pipeline string `hcl:"pipeline"`
+	Pipeline string `hcl:"pipeline,optional"`
 	App      string `hcl:"app,optional"`
 }
 

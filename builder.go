@@ -24,7 +24,7 @@ import (
 type BuildConfig struct {
 	From     string `hcl:"from"`
 	Source   string `hcl:"source,optional"`
-	Pipeline string `hcl:"pipeline"`
+	Pipeline string `hcl:"pipeline,optional"`
 	App      string `hcl:"app,optional"`
 }
 

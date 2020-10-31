@@ -12,7 +12,7 @@ import (
 )
 
 type DeployConfig struct {
-	Pipeline string `hcl:"pipeline"`
+	Pipeline string `hcl:"pipeline,optional"`
 	App      string `hcl:"app,optional"`
 }
 
@@ -134,7 +134,6 @@ func (p *Platform) releaseHerokuSlug(ctx context.Context, log hclog.Logger, h *h
 var (
 	_ component.Platform         = (*Platform)(nil)
 	_ component.Configurable     = (*Platform)(nil)
-	_ component.Destroyer        = (*Platform)(nil)
 	_ component.PlatformReleaser = (*Platform)(nil)
 	_ component.Deployment       = (*Deployment)(nil)
 )

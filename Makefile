@@ -12,7 +12,7 @@ build:
 
 	go build -o ./bin/waypoint-plugin-heroku ./*.go 
 
-install:
+install: build
 	@echo ""
 	@echo "Installing Plugin"
 
