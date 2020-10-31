@@ -1,4 +1,4 @@
-package registry
+package main
 
 import (
 	"bytes"
@@ -14,6 +14,7 @@ import (
 	"github.com/docker/docker/pkg/jsonmessage"
 	"github.com/docker/docker/registry"
 	"github.com/hashicorp/go-hclog"
+	"github.com/hashicorp/waypoint-plugin-sdk/component"
 	"github.com/hashicorp/waypoint-plugin-sdk/terminal"
 	wpdocker "github.com/hashicorp/waypoint/builtin/docker"
 	"google.golang.org/grpc/codes"
@@ -63,6 +64,11 @@ func (r *Registry) push(
 
 	target := "registry.heroku.com/" + r.config.App
 	step.Update("Tagging Docker image: %s => %s", img.Name(), target)
+
+	imgInspect, _, err := cli.ImageInspectWithRaw(ctx, img.Name())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "unable to inspect image:%s", err)
+	}
 
 	err = cli.ImageTag(ctx, img.Name(), target)
 	if err != nil {
@@ -138,5 +144,10 @@ func (r *Registry) push(
 	step = sg.Add("Docker image pushed: %s", target)
 	step.Done()
 
-	return &Artifact{Image: target}, nil
+	return &Artifact{ContainerImageDigest: imgInspect.ID}, nil
 }
+
+var (
+	_ component.Registry     = (*Registry)(nil)
+	_ component.Configurable = (*Registry)(nil)
+)

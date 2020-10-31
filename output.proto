@@ -1,0 +1,19 @@
+
+syntax = "proto3";
+
+package herokuplugin;
+
+option go_package = "github.com/fanatic/waypoint-plugin-heroku;main";
+
+message Artifact {
+  string containerImageDigest = 1;
+  string slugID = 2;
+}
+
+message Deployment {
+  string url = 1;
+}
+
+message Release {
+  string url = 1;
+}

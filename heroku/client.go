@@ -17,6 +17,8 @@ func New() (*heroku.Service, error) {
 	}
 
 	heroku.DefaultTransport.Password = p
+	heroku.DefaultTransport.AdditionalHeaders = map[string][]string{}
+	heroku.DefaultTransport.AdditionalHeaders["Accept"] = []string{"application/vnd.heroku+json; version=3.docker-releases"}
 	h := heroku.NewService(heroku.DefaultClient)
 
 	return h, nil

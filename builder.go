@@ -1,4 +1,4 @@
-package builder
+package main
 
 import (
 	"archive/tar"
@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 
 	"github.com/fanatic/waypoint-plugin-heroku/heroku"
@@ -42,7 +43,13 @@ func (b *Builder) BuildFunc() interface{} {
 	return b.build
 }
 
-func (b *Builder) build(ctx context.Context, ui terminal.UI, job *component.JobInfo, src *component.Source, log hclog.Logger) (*Slug, error) {
+func (b *Builder) build(ctx context.Context, ui terminal.UI, job *component.JobInfo, src *component.Source, log hclog.Logger) (*Artifact, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("Panic: %s %s", r, string(debug.Stack()))
+		}
+	}()
+
 	h, err := heroku.New()
 	if err != nil {
 		return nil, err
@@ -87,8 +94,8 @@ func (b *Builder) build(ctx context.Context, ui terminal.UI, job *component.JobI
 		}
 		step.Done()
 
-		return &Slug{
-			Id: slugID,
+		return &Artifact{
+			SlugID: slugID,
 		}, nil
 	} else if b.config.From == "archive" {
 		sg := ui.StepGroup()
@@ -113,8 +120,8 @@ func (b *Builder) build(ctx context.Context, ui terminal.UI, job *component.JobI
 		}
 		step.Done()
 
-		return &Slug{
-			Id: slugID,
+		return &Artifact{
+			SlugID: slugID,
 		}, nil
 	}
 
@@ -175,6 +182,12 @@ func (b *Builder) createHerokuSource(ctx context.Context, h *herokuSDK.Service, 
 }
 
 func (b *Builder) createHerokuBuild(ctx context.Context, h *herokuSDK.Service, sourceURL, sourceVersion string, w io.Writer) (string, error) {
+	// Force build stack back to heroku-18 in case we set it to container with a previous push
+	_, err := h.AppUpdate(ctx, b.config.App, herokuSDK.AppUpdateOpts{BuildStack: String("heroku-18")})
+	if err != nil {
+		return "", err
+	}
+
 	buildOpts := herokuSDK.BuildCreateOpts{}
 	buildOpts.SourceBlob.URL = &sourceURL
 	buildOpts.SourceBlob.Version = &sourceVersion
@@ -190,6 +203,11 @@ func (b *Builder) createHerokuBuild(ctx context.Context, h *herokuSDK.Service, s
 	defer resp.Body.Close()
 
 	io.Copy(w, resp.Body)
+
+	build, err = h.BuildInfo(ctx, b.config.App, build.ID)
+	if err != nil {
+		return "", err
+	}
 
 	return build.Slug.ID, nil
 }
@@ -313,3 +331,8 @@ func Tar(src string, writers ...io.Writer) error {
 func String(s string) *string {
 	return &s
 }
+
+var (
+	_ component.Builder      = (*Builder)(nil)
+	_ component.Configurable = (*Builder)(nil)
+)
