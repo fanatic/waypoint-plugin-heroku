@@ -16,4 +16,5 @@ install: build
 	@echo ""
 	@echo "Installing Plugin"
 
+	mkdir -p ${HOME}/.config/waypoint/plugins/
 	cp ./bin/waypoint-plugin-heroku ${HOME}/.config/waypoint/plugins/
