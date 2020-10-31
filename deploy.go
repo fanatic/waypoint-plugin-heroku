@@ -59,9 +59,10 @@ func (p *Platform) deploy(
 		return nil, err
 	}
 
-	if p.config.App == "" {
-		// p.createHerokuApp()
-	}
+	// TODO: support dynamically creating an app in the pipeline per deploy
+	// if p.config.App == "" {
+	// 	 p.createHerokuApp()
+	// }
 
 	if artifact.ContainerImageDigest != "" {
 		if err := p.releaseHerokuContainer(ctx, log, h, p.config.App, artifact.ContainerImageDigest); err != nil {

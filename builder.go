@@ -202,7 +202,9 @@ func (b *Builder) createHerokuBuild(ctx context.Context, h *herokuSDK.Service, s
 	}
 	defer resp.Body.Close()
 
-	io.Copy(w, resp.Body)
+	if _, err := io.Copy(w, resp.Body); err != nil {
+		return "", err
+	}
 
 	build, err = h.BuildInfo(ctx, b.config.App, build.ID)
 	if err != nil {
