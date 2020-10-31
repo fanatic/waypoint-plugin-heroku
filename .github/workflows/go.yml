@@ -1,0 +1,69 @@
+name: Go
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.31
+
+  test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.15
+
+      - uses: actions/checkout@v2
+
+      - name: Setup Go modules cache
+        id: cache-go-module
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Setup Go build cache
+        id: cache-go-build
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/go-build
+          key: ${{ runner.os }}-go-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        if: steps.cache-go-module.outputs.cache-hit != 'true'
+        run: go mod download
+
+      - name: Verify go modules up to date
+        run: |
+          set -ex
+          go mod tidy
+          [ -z "$(git diff -- go.{mod,sum})" ] # Check there are no changes!
+
+      - name: Build
+        run: make install
+
+      - name: Test
+        run: go test -race ./... -json > /tmp/go-test.json
+
+      - name: Annotate tests
+        if: always()
+        uses: guyarb/golang-test-annoations@v0.1
+        with:
+          test-results: /tmp/go-test.json
